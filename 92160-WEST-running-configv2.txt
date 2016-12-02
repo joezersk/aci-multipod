@@ -1,0 +1,180 @@
+!Command: show running-config
+!Time: Fri Dec  2 10:56:54 2016
+
+version 7.0(3)I4(3)
+switchname 92160-WEST
+policy-map type network-qos jumbo
+  class type network-qos class-default
+    mtu 9150
+
+feature telnet
+feature nxapi
+feature bash-shell
+feature ospf
+feature pim
+feature interface-vlan
+feature dhcp
+feature lldp
+
+username admin password 5 $5$CMEGJP$.lMXvOdJLCugtGKSR6ThvBKDtT7LDizQpgz7B69R2L5  role network-admin
+no ip domain-lookup
+ip name-server 173.38.200.100
+system default switchport
+
+system qos
+  service-policy type network-qos jumbo
+copp profile strict
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+snmp-server community insbu group network-admin
+ntp server 173.38.201.115
+
+ip pim ssm range 232.0.0.0/8
+vlan 1-5,10
+vlan 2
+  name 100G-ROUTED-NEW
+vlan 3
+  name CISCO-LAB-GATEWAY
+vlan 4
+  name 40G-IPN-NEW
+vlan 5
+  name Link-to-N5K
+vlan 10
+  name 10.50.129.x
+
+service dhcp
+ip dhcp relay
+no ipv6 dhcp relay
+vrf context management
+  ip route 0.0.0.0/0 10.50.129.254
+vrf context tn-infra
+  ip pim rp-address 12.1.1.1 group-list 225.0.0.0/8 bidir
+  ip pim rp-address 12.1.1.1 group-list 239.255.255.240/28 bidir
+  ip pim ssm range 232.0.0.0/8
+
+hardware profile portmode 48x25G+2x100G+4x40G
+
+hardware profile multicast max-limit lpm-entries 0
+vlan configuration 3
+
+
+interface Vlan1
+
+interface Vlan3
+  description /30 link to AMS-LAB-GW1 (10.61.2.5)
+  no shutdown
+  ip address 10.61.2.6/30
+  ip pim sparse-mode
+
+interface Vlan4
+  description Inter-router VLAN to N5K
+  mtu 9150
+  ip address 9.9.9.1/24
+  ip ospf mtu-ignore
+  ip router ospf 1 area 0.0.0.1
+
+interface Vlan5
+  description Inter-router VLAN to N5K
+  no shutdown
+  mtu 9150
+  ip address 9.9.9.1/24
+  ip ospf mtu-ignore
+  ip router ospf 1 area 0.0.0.1
+
+interface Vlan10
+  description don't bring this int up ever
+  ip address 10.50.129.1/24
+
+interface Ethernet1/1
+  description /30 link to AMS-LAB-GW1 (10.61.2.5)
+  switchport access vlan 3
+  spanning-tree port type edge
+  speed 1000
+
+interface Ethernet1/2
+  description link to N5500-LAB
+  switchport mode trunk
+  spanning-tree port type network
+
+interface Ethernet1/3
+
+interface Ethernet1/4
+
+#snip unused interfaces for brevity#
+
+interface Ethernet1/48
+
+interface Ethernet1/49
+  description 40G link from SPINE-1 to IPN
+  no switchport
+  mtu 9150
+  vrf member tn-infra
+  no shutdown
+
+interface Ethernet1/49.4
+  description 40G link from SPINE-2 to IPN
+  mtu 9150
+  encapsulation dot1q 4
+  vrf member tn-infra
+  ip address 202.1.1.2/30
+  ip ospf network point-to-point
+  ip ospf mtu-ignore
+  ip router ospf a1 area 0.0.0.0
+  ip pim sparse-mode
+  ip dhcp relay address 10.0.0.1 
+  no shutdown
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+  description 100G interlink to 92160-EAST
+  no switchport
+  speed 100000
+  duplex full
+  mtu 9150
+  no negotiate auto
+  vrf member tn-infra
+  ip address 92.92.92.1/30
+  ip ospf network point-to-point
+  ip router ospf a1 area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface mgmt0
+  vrf member management
+  ip address 10.50.129.45/24
+
+interface loopback99
+  vrf member tn-infra
+  ip address 12.1.1.1/32
+  ip router ospf a1 area 0.0.0.0
+  ip pim sparse-mode
+clock timezone CET 1 0
+clock summer-time CEST 2 Sun Mar 02:00 1 Sun Nov 02:00 60
+cli alias name wr copy run start
+line console
+line vty
+  exec-timeout 300
+boot nxos bootflash:/nxos.7.0.3.I4.3.bin 
+ip route 0.0.0.0/0 10.61.2.5
+ip route 10.50.128.0/23 9.9.9.2
+router ospf 1
+  router-id 93.93.93.1
+  area 0.0.0.1 nssa no-summary
+  area 0.0.0.1 range 0.0.0.0/0
+router ospf a1
+  router-id 93.93.93.2
+  log-adjacency-changes detail
+no system default switchport shutdown
+logging monitor 7
+no logging console
+
