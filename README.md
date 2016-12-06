@@ -4,7 +4,7 @@ There are four files here in two logical groups.   The two text files are the ru
 <P>
 <B>UPDATE DEC 2016</B>
 <P>
-<I>I have updated my IPN config to use an optional (but recommended) vrf just for the multipod stuff.  Please review the running config files in version 2 in this repo.  Also note some PIM commands now moved to the dedeicated vrf context.</I>
+<I>I have updated my IPN config to use an optional (but recommended) vrf just for the multipod stuff.  Please review the running config files in version 2 in this repo.  Also note some PIM commands now moved to the dedicated vrf context.</I>
 <P>
 <HR>
 <P>
