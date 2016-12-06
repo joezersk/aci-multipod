@@ -15,7 +15,7 @@ import cobra.model.pol
 from cobra.internal.codec.xmlcodec import toXMLStr
 
 # log into an APIC and create a directory object
-ls = cobra.mit.session.LoginSession('https://10.50.129.241', 'admin', 'cisco123')
+ls = cobra.mit.session.LoginSession('https://1.1.1.1', 'admin', 'cisco123')
 md = cobra.mit.access.MoDirectory(ls)
 md.login()
 
