@@ -69,13 +69,6 @@ interface Vlan3
   ip address 10.61.2.6/30
   ip pim sparse-mode
 
-interface Vlan4
-  description Inter-router VLAN to N5K
-  mtu 9150
-  ip address 9.9.9.1/24
-  ip ospf mtu-ignore
-  ip router ospf 1 area 0.0.0.1
-
 interface Vlan5
   description Inter-router VLAN to N5K
   no shutdown
@@ -83,10 +76,6 @@ interface Vlan5
   ip address 9.9.9.1/24
   ip ospf mtu-ignore
   ip router ospf 1 area 0.0.0.1
-
-interface Vlan10
-  description don't bring this int up ever
-  ip address 10.50.129.1/24
 
 interface Ethernet1/1
   description /30 link to AMS-LAB-GW1 (10.61.2.5)
