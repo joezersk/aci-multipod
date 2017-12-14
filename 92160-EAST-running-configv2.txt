@@ -118,4 +118,5 @@ ip route 0.0.0.0/0 10.50.129.254 vrf management
 router ospf a1
   router-id 93.93.93.254
   log-adjacency-changes detail
+  vrf tn-infra
 no system default switchport shutdown
