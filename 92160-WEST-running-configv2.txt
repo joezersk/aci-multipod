@@ -163,6 +163,7 @@ router ospf 1
 router ospf a1
   router-id 93.93.93.2
   log-adjacency-changes detail
+  vrf tn-infra
 no system default switchport shutdown
 logging monitor 7
 no logging console
