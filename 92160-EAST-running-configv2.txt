@@ -1,67 +1,49 @@
-!Command: show running-config
-!Time: Fri Dec  2 09:56:37 2016
+#  Show run of IPN EAST running config with all unrelated items edited out for clarity #
 
-version 7.0(3)I4(3)
-switchname 92160-EAST
+92160-IPN-EAST#
+
+!Command: show running-config
+!Running configuration last done at: Mon Nov 30 18:09:17 2020
+!Time: Fri Dec 18 10:04:35 2020
+
+version 9.3(2) Bios:version 07.66
+power redundancy-mode combined force
+hardware profile multicast max-limit lpm-entries 0
+
+hostname 92160-IPN-EAST
 policy-map type network-qos jumbo
   class type network-qos class-default
-    mtu 9150
+    mtu 9216
 
 feature telnet
 feature nxapi
 feature bash-shell
+feature scp-server
+feature sftp-server
 feature ospf
 feature pim
 feature interface-vlan
 feature dhcp
 feature lldp
+feature bfd
+clock timezone CET 1 0
+clock summer-time CEST 2 Sun Mar 02:00 1 Sun Nov 02:00 60
 
-username admin password 5 $5$KGDHDD$jTMcb6lPrGptTLP7C3s105J4QNOe2xGbaCA9wlGlQm8  role network-admin
-username joezersk password 5 $5$DKGKMI$zMd.nl8Bg3GnP8dO6/U1jCoUALPOAJGcgnI7TZTILb.  role network-admin
-no ip domain-lookup
-ip name-server 173.38.200.100
-system default switchport
-system jumbomtu 9150
+banner motd ^
+############################
+This is IPN-EAST
+############################
+^
+
 system qos
   service-policy type network-qos jumbo
-copp profile strict
-rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
-rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
-rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
-rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
-rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
-snmp-server community insbu group network-admin
-ntp server 173.38.201.115
-
-ip pim ssm range 232.0.0.0/8
-vlan 1-2,4-5
-vlan 2
-  name 100G-ROUTED-NEW
-vlan 4
-  name 40G-IPN-NEW
-vlan 5
-  name 40G-IPN
 
 service dhcp
 ip dhcp relay
-no ipv6 dhcp relay
-vrf context management
-  ip route 0.0.0.0/0 10.50.129.254
 vrf context tn-infra
   ip pim rp-address 12.1.1.1 group-list 225.0.0.0/8 bidir
   ip pim rp-address 12.1.1.1 group-list 239.255.255.240/28 bidir
-hardware profile portmode 48x25G+2x100G+4x40G
-
-hardware profile multicast max-limit lpm-entries 0
-
-
-interface Vlan1
-
-interface Ethernet1/1
-
-#snip unused interfaces for brevity#
-
-interface Ethernet1/48
+  ip pim ssm range 232.0.0.0/8
 
 interface Ethernet1/49
   description 40G link from SPINE-2 to IPN
@@ -79,44 +61,34 @@ interface Ethernet1/49.4
   ip ospf network point-to-point
   ip ospf mtu-ignore
   ip router ospf a1 area 0.0.0.0
+  ip ospf bfd
   ip pim sparse-mode
-  ip dhcp relay address 10.0.0.1 
+  ip dhcp relay address 10.0.0.1
   no shutdown
 
-interface Ethernet1/50
-  description open not used
-
-interface Ethernet1/51
-
-interface Ethernet1/52
-  description 100G interlink to 92160-WEST
-  no switchport
-  speed 100000
-  duplex full
+interface Ethernet1/49.5
+  description Sub-Int for ACI Remote Leaf
   mtu 9150
-  no negotiate auto
+  encapsulation dot1q 5
+  vrf member rleaf
+  ip address 10.50.238.30/30
+  ip ospf network point-to-point
+  ip ospf mtu-ignore
+  ip router ospf rleaf area 0.0.0.0
+  ip ospf bfd
+  no shutdown
+
+interface loopback99
   vrf member tn-infra
-  ip address 92.92.92.2/30
+  ip address 12.1.1.2/29
   ip ospf network point-to-point
   ip router ospf a1 area 0.0.0.0
   ip pim sparse-mode
-  no shutdown
 
-interface Ethernet1/53
-
-interface Ethernet1/54
-
-interface mgmt0
-  vrf member management
-  ip address 10.50.129.44/24
-cli alias name wr copy run start
-line console
-line vty
-  exec-timeout 300
-boot nxos bootflash:/nxos.7.0.3.I4.3.bin 
-ip route 0.0.0.0/0 10.50.129.254 vrf management
 router ospf a1
-  router-id 93.93.93.254
+  bfd
+  router-id 222.1.1.2
   log-adjacency-changes detail
   vrf tn-infra
-no system default switchport shutdown
+
+92160-IPN-EAST#
